@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10"
 colorlog = "^6.8.2"
 pyexecjs = "^1.5.1"
+py-mini-racer = "^0.6.0"
 
 
 [build-system]
