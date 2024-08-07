@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 colorlog = "^6.8.2"
+pyexecjs = "^1.5.1"
 
 
 [build-system]
