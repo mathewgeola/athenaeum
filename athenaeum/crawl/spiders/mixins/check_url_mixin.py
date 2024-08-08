@@ -4,6 +4,21 @@ from ...errors import CheckUrlError
 
 
 class CheckUrlMixin(object):
+    """
+    example:
+
+        class Example(CheckUrlMixin):
+            url_patterns = [
+                r'https?://www\.baidu\.com/s\?\S*?wd=(?P<wd>\S+?)(?:&|$)',
+                r'https?://www\.so\.com/s\?\S*?q=(\S+?)(?:&|$)'
+            ]
+
+
+        example = Example()
+        print(example.check_url('https://www.baidu.com/s?wd=Example'))
+        print(example.check_url('https://www.so.com/s?q=Example'))
+
+    """
     url_patterns: List[str]
 
     def check_url(self, url: str) -> Union[None, Tuple[str, ...], Dict[str, str]]:
