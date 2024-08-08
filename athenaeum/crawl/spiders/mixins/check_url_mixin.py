@@ -1,5 +1,5 @@
 import re
-from typing import Union, Tuple, List, Dict
+from typing import Union, List, Sequence, AnyStr
 from ...errors import CheckUrlError
 
 
@@ -21,7 +21,7 @@ class CheckUrlMixin(object):
     """
     url_patterns: List[str]
 
-    def check_url(self, url: str) -> Union[None, Tuple[str, ...], Dict[str, str]]:
+    def check_url(self, url: str) -> Union[None, dict[str, AnyStr], Sequence[AnyStr]]:
         if not hasattr(self, 'url_patterns') or not isinstance(self.url_patterns, list):
             raise CheckUrlError(f'{self.__class__.__name__}.url_patterns must be assigned values correctly!')
 
