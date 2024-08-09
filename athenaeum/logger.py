@@ -123,15 +123,22 @@ def get_logger(
     _logger.setLevel(level)
 
     if to_console:
-        _set_console_handler(_logger,
-                             console_fmt=console_fmt)
+        console_handler_exists = any(isinstance(handler, logging.StreamHandler) for handler in _logger.handlers)
+        if not console_handler_exists:
+            _set_console_handler(_logger,
+                                 console_fmt=console_fmt)
+
     if to_file:
-        if file_path is None:
-            file_path = _file_path
-        _set_file_handler(_logger,
-                          file_path=file_path, file_mode=file_mode, file_max_bytes=file_max_bytes,
-                          file_backup_count=file_backup_count, file_encoding=file_encoding,
-                          file_fmt=file_fmt)
+        file_handler_exists = any(isinstance(handler,
+                                             logging.handlers.RotatingFileHandler) for handler in _logger.handlers)
+        if not file_handler_exists:
+            if file_path is None:
+                file_path = _file_path
+            _set_file_handler(_logger,
+                              file_path=file_path, file_mode=file_mode, file_max_bytes=file_max_bytes,
+                              file_backup_count=file_backup_count, file_encoding=file_encoding,
+                              file_fmt=file_fmt)
+
     return _logger
 
 
