@@ -1,6 +1,6 @@
 import re
 from typing import Union, Tuple, Sequence, AnyStr
-from ...errors import CheckUrlError
+from ... import CheckUrlError
 
 
 class CheckUrlMixin(object):
@@ -20,11 +20,6 @@ class CheckUrlMixin(object):
 
     """
     url_patterns: Tuple[str, ...]
-
-    def __repr__(self) -> str:
-        return self.__class__.__name__
-
-    __str__ = __repr__
 
     def check_url(self, url: str) -> Union[None, dict[str, AnyStr], Sequence[AnyStr]]:
         if not hasattr(self, 'url_patterns') or \

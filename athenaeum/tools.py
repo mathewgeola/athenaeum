@@ -1,7 +1,7 @@
 import re
 import ujson
 from typing import Dict, Any
-from .execute.js import execute_js_code_by_py_mini_racer
+from .execute import execute_js_code_by_py_mini_racer
 
 
 def jsonp_to_json(jsonp: str) -> Dict[str, Any]:
