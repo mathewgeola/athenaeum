@@ -1,0 +1,12 @@
+import re
+import ujson
+from typing import Dict, Any
+from .execute.js import execute_js_code_by_py_mini_racer
+
+
+def jsonp_to_json(jsonp: str) -> Dict[str, Any]:
+    func_name = re.match(r'(jQuery.*?)\(?P<func_name>\{.*\}\)', jsonp).groupdict()['func_name']
+    js_code = f'''function {func_name}(o){{return o}};function sdk(){{return JSON.stringify({jsonp})}};'''
+    json_str = execute_js_code_by_py_mini_racer(js_code, func_name='sdk')
+    json_obj = ujson.loads(json_str)
+    return json_obj

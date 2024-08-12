@@ -1,5 +1,5 @@
 import re
-from typing import Union, List, Sequence, AnyStr
+from typing import Union, Tuple, Sequence, AnyStr
 from ...errors import CheckUrlError
 
 
@@ -8,10 +8,10 @@ class CheckUrlMixin(object):
     example:
 
         class Example(CheckUrlMixin):
-            url_patterns = [
+            url_patterns = (
                 r'https?://www\.baidu\.com/s\?\S*?wd=(?P<wd>\S+?)(?:&|$)',
                 r'https?://www\.so\.com/s\?\S*?q=(\S+?)(?:&|$)'
-            ]
+            )
 
 
         example = Example()
@@ -19,11 +19,19 @@ class CheckUrlMixin(object):
         print(example.check_url('https://www.so.com/s?q=Example'))
 
     """
-    url_patterns: List[str]
+    url_patterns: Tuple[str, ...]
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
+
+    __str__ = __repr__
 
     def check_url(self, url: str) -> Union[None, dict[str, AnyStr], Sequence[AnyStr]]:
-        if not hasattr(self, 'url_patterns') or not isinstance(self.url_patterns, list):
-            raise CheckUrlError(f'{self.__class__.__name__}.url_patterns must be assigned values correctly!')
+        if not hasattr(self, 'url_patterns') or \
+                not isinstance(self.url_patterns, tuple) or \
+                not all(map(lambda x: isinstance(x, str), self.url_patterns)):
+            raise CheckUrlError(f'{self.__class__.__name__}.url_patterns：`{self.__class__.url_patterns}` 赋值错误，'
+                                f'其值只能是字符串元组！')
 
         if not self.url_patterns:
             return
@@ -41,4 +49,5 @@ class CheckUrlMixin(object):
                 return groups
             return
 
-        raise CheckUrlError(f'Url does not conform to the rules of the {self.__class__.__name__}.url_patterns!')
+        raise CheckUrlError(f'url：`{url}` 没有匹配 {self.__class__.__name__}.url_patterns：'
+                            f'{self.__class__.url_patterns}！')

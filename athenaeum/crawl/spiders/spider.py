@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
-from typing import Any, MutableMapping
+from typing import Any
 from typing_extensions import Self  # type: ignore
+from ..items.item import Item
 
 
 class Spider(ABC):
@@ -18,5 +19,5 @@ class Spider(ABC):
         pass
 
     @abstractmethod
-    def save_item(self, item: MutableMapping) -> None:
+    def save_item(self, item: Item) -> None:
         pass
