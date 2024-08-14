@@ -1,8 +1,8 @@
 import inspect
 import asyncio
 from typing import Optional, Type, Tuple, Dict, Any, Callable, Generator, AsyncGenerator, Union, Coroutine
-from .spiders import Spider
-from .items import Item
+from athenaeum.crawl.spiders.spider import Spider
+from athenaeum.crawl.items.item import Item
 
 
 async def call_func(func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
@@ -80,7 +80,7 @@ def crawl(spider_cls: Type[Spider],
 
     async def _crawl():
         if not issubclass(spider_cls, Spider):
-            raise TypeError(f'spider_cls：{spider_cls} 必须是 Spider 的子类！')
+            raise TypeError(f'spider_cls：`{spider_cls}` 必须是 Spider 的子类！')
         spider_ins = spider_cls.create_instance(*init_args, **init_kwargs)
         async for item in gen_func(spider_ins.start_requests, *start_requests_args, **start_requests_kwargs):
             spider_ins.save_item(item)

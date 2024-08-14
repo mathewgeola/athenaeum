@@ -1,6 +1,6 @@
 import re
 from typing import Union, Tuple, Sequence, AnyStr
-from ... import CheckUrlError
+from athenaeum.crawl.errors import CheckUrlError
 
 
 class CheckUrlMixin(object):

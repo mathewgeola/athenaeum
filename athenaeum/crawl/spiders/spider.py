@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 from typing_extensions import Self  # type: ignore
-from ..items import Item
+from athenaeum.crawl.items.item import Item
 
 
 class Spider(ABC):

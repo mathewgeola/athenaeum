@@ -15,16 +15,13 @@ def camel_to_snake(name: str) -> str:
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
 
 
-ALGO_TYPE = Literal[
-    'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384',
-    'sha3_512', 'shake_128', 'shake_256'
-]
-
-
 def gen_data_id(
         *args: Any,
         keys: Optional[List] = None, item: Optional[Dict] = None,
-        algo_type: ALGO_TYPE = 'md5'
+        algo_type: Literal[
+            'md5', 'sha1', 'sha224', 'sha256', 'sha384', 'sha512', 'blake2b', 'blake2s', 'sha3_224', 'sha3_256', 'sha3_384',
+            'sha3_512', 'shake_128', 'shake_256'
+        ] = 'md5'
 ) -> str:
     """
     >>> gen_data_id('123456')
@@ -43,11 +40,11 @@ def gen_data_id(
         if isinstance(keys, list) and isinstance(item, dict):
             values = [item[k] for k in keys if k in item]
         else:
-            raise ValueError('Keys and item must be list and dict!')
+            raise ValueError('keys 必须是列表，item 必须是字典！')
     elif item is not None:
         values = [item[k] for k in sorted(item.keys())]
     else:
-        raise ValueError('Args or keys and item or item must be provided!')
+        raise ValueError('args 或 keys 和 item 或 item 必须赋值！')
 
     data = list(map(lambda x: str(x), values))
 
