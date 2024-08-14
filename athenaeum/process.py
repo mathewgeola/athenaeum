@@ -1,6 +1,6 @@
 import psutil
-from athenaeum.logger import logger
 from typing import List
+from athenaeum.logger import logger
 
 
 def kill_process_by_port(port: int) -> None:

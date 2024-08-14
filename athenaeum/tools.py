@@ -2,6 +2,7 @@ import re
 import time
 import tqdm
 import ujson
+import sqlparse
 from htmlmin import minify
 from typing import Dict, Any, List, Protocol
 from athenaeum.execute.js import execute_js_code_by_py_mini_racer
@@ -21,6 +22,16 @@ def chunk_data(data: List[Any], chunk_size: int) -> List[List[Any]]:
 
 def compressed_html(html: str, **kwargs: Any) -> str:
     return minify(html, **kwargs)
+
+
+def format_sql(sql: str, **kwargs) -> str:
+    kw = dict(reindent=True,
+              keyword_case='upper',
+              identifier_case='lower',
+              strip_comments=True)
+    kw.update(kwargs)
+    sql = sqlparse.format(sql, **kw)
+    return sql
 
 
 class Container(Protocol):
