@@ -8,7 +8,8 @@ from config import settings  # type: ignore
 class Account(object):
     """
     使用教程：
-        settings.toml
+        /project/settings/settings.toml
+
         [default.account.baidu.user1]
         owner = "xxx"
         username = "111111"

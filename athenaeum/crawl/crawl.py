@@ -80,7 +80,7 @@ def crawl(spider_cls: Type[Spider],
 
     async def _crawl():
         if not issubclass(spider_cls, Spider):
-            raise TypeError(f'spider_cls：`{spider_cls}` 必须是 Spider 的子类！')
+            raise TypeError(f'spider_cls：`{spider_cls}` 必须是 `athenaeum.crawl.spiders.spider.Spider` 的子类！')
         spider_ins = spider_cls.create_instance(*init_args, **init_kwargs)
         async for item in gen_func(spider_ins.start_requests, *start_requests_args, **start_requests_kwargs):
             spider_ins.save_item(item)

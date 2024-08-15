@@ -1,7 +1,6 @@
 import inspect
 from abc import abstractmethod
-from typing import Optional, Any, Type
-from athenaeum.crawl.items.base_item import BaseItem
+from typing import Optional
 from athenaeum.metas import BasesAttrsMergeMeta
 from athenaeum.crawl.spiders.base_data_spider import BaseDataSpider
 from athenaeum.project import camel_to_snake
@@ -26,12 +25,10 @@ class BaseSpider(BaseDataSpider, metaclass=BaseSpiderMeta):
     name: str
     source: Optional[str] = None
     url: Optional[str] = None
-    start_datetime: str = '2024-08-08 00:00:00'
+    start_datetime: str = '1998-12-25 00:00:00'
     limit_interval: int = 86400
     run_interval: int = 86400
     status: int = 1
-
-    Item: Type[BaseItem] = BaseItem
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} name：{self.name}>'
@@ -39,5 +36,5 @@ class BaseSpider(BaseDataSpider, metaclass=BaseSpiderMeta):
     __str__ = __repr__
 
     @abstractmethod
-    def start_requests(self, *args: Any, **kwargs: Any) -> Any:
+    def start_requests(self, *args, **kwargs):
         pass

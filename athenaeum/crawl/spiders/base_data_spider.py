@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from pprint import pformat
-from typing import Any, Optional
+from typing import Optional
 from athenaeum.crawl.items.item import Item
 from athenaeum.crawl.spiders.spider import Spider
 
@@ -8,7 +8,7 @@ from athenaeum.crawl.spiders.spider import Spider
 class BaseDataSpider(Spider):
 
     @abstractmethod
-    def start_requests(self, *args: Any, **kwargs: Any) -> Any:
+    def start_requests(self, *args, **kwargs):
         pass
 
     def save_item(self, item: Optional[Item] = None) -> None:

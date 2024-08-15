@@ -17,7 +17,11 @@ class Spider(ABC):
         return cls(*args, **kwargs)
 
     @abstractmethod
-    def start_requests(self, *args: Any, **kwargs: Any) -> Any:
+    def save_item(self, item: Optional[Item] = None) -> None:
+        pass
+
+    @abstractmethod
+    def start_requests(self, *args, **kwargs):
         pass
 
     def parse(self, *args, **kwargs):
@@ -81,8 +85,4 @@ class Spider(ABC):
         pass
 
     def parse_twentieth(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def save_item(self, item: Optional[Item] = None) -> None:
         pass

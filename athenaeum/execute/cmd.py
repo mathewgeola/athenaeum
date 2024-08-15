@@ -11,13 +11,13 @@ def execute_cmd(cmd: str, encoding: str = 'utf-8') -> Optional[bool]:
                                    encoding=encoding)
         stdout, stderr = process.communicate()
         if process.returncode == 0:
-            logger.success(f'cmd：{cmd} 运行成功')
+            logger.success(f'cmd：`{cmd}`，运行成功')
             result = stdout
         else:
-            logger.error(f'cmd：{cmd} 运行失败！')
+            logger.error(f'cmd：`{cmd}`，运行失败！')
             result = False
     except Exception as exception:
-        logger.exception(f'cmd：{cmd} 未知错误，exception：{exception}！')
+        logger.exception(f'cmd：`{cmd}` 未知错误，exception：{exception}！')
         result = False
     finally:
         return result
