@@ -1,5 +1,6 @@
 from pathlib import Path
 from dynaconf import Dynaconf
+from athenaeum.logger import logger
 
 ROOT_DIR = Path(__file__).absolute().parent
 
@@ -23,7 +24,7 @@ settings = Dynaconf(
 
 settings.ROOT_DIR = ROOT_DIR
 
-print(f'current environment: {settings.current_env}.')
+logger.debug(f'current environment: {settings.current_env}.')
 
 __all__ = [
     'settings',
