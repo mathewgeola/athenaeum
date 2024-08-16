@@ -1,5 +1,7 @@
 import yagmail
-from typing import Any
+import tkinter as tk
+from tkinter import messagebox
+from typing import Optional, Union, List, Any
 from athenaeum.logger import logger
 from config import settings  # type: ignore
 
@@ -26,3 +28,26 @@ class Notifier(object):
             cls.logger.error(f'邮件发送失败，exception：{exception}！')
         else:
             cls.logger.success('邮件发送成功')
+
+    @classmethod
+    def notify_by_tkinter(cls, title: Optional[str] = None, message: Optional[str] = None,
+                          break_cond: Union[List[Union[None, bool]], Union[None, bool]] = True) -> None:
+        if title is None:
+            title = 'athenaeum 通知提醒'
+        if message is None:
+            message = '这是一个 `athenaeum 通知提醒` 的弹窗'
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes('-topmost', True)
+
+        while True:
+            result = messagebox.askyesnocancel(title, message)
+            if isinstance(break_cond, list):
+                if result in break_cond:
+                    break
+            else:
+                if result == break_cond:
+                    break
+
+        root.destroy()

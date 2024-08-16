@@ -9,8 +9,6 @@ class ChromeExtension(object):
 
     @property
     def user_data_dir(self) -> Optional[str]:
-        user_data_dir = None
-
         system = platform.system()
         if system == 'Windows':
             user_data_dir = os.path.expandvars(r'%LOCALAPPDATA%\Google\Chrome\User Data')
@@ -20,7 +18,6 @@ class ChromeExtension(object):
             user_data_dir = os.path.expanduser('~/Library/Application Support/Google/Chrome')
         else:
             raise ValueError(f'system：`{system}` 不支持该系统！')
-
         return user_data_dir
 
     @property

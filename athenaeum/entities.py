@@ -5,7 +5,7 @@ from config import settings  # type: ignore
 
 
 @dataclass
-class Account(object):
+class AccountEntity(object):
     """
     使用教程：
         /project/settings/settings.toml
@@ -27,7 +27,7 @@ class Account(object):
     password: str
 
     @classmethod
-    def get_a_random_account(cls, platform: str) -> Self:
+    def get_a_random_account_entity(cls, platform: str) -> Self:
         users = settings.account[platform]
         user = users[random.choice(list(users.keys()))]
         return cls(
