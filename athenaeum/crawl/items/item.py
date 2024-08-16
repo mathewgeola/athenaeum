@@ -62,7 +62,7 @@ class Item(MutableMapping, metaclass=ItemMeta):
         super().__setattr__(key, value)
 
     def __getattr__(self, key) -> None:
-        raise AttributeError(f'不能获取不存在的属性！')
+        raise AttributeError(f'key：`{key}` 不能获取不存在的属性！')
 
     def __getattribute__(self, key) -> Any:
         _Fields = super().__getattribute__('_Fields')

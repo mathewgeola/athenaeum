@@ -2,6 +2,7 @@ import re
 import time
 import tqdm
 import ujson
+import inspect
 import sqlparse
 from htmlmin import minify
 from typing import Dict, Any, List, Protocol
@@ -63,3 +64,7 @@ def show_progress(container: Container, frequency: float = 1.0) -> None:
             break
 
         time.sleep(frequency)
+
+
+def get_routine_name() -> str:
+    return inspect.stack()[1][3]

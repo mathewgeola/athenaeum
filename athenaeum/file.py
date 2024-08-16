@@ -11,11 +11,11 @@ class File(object):
 
         with os.scandir(path) as entries:
             for entry in entries:
-                if entry.is_file():
-                    files.append(entry.path)
-                elif entry.is_dir():
-                    dirs.append(entry.path)
-                    sub_files, sub_dirs = cls.get_files_and_dirs(entry.path)
+                if entry.is_file():  # noqa
+                    files.append(entry.path)  # noqa
+                elif entry.is_dir():  # noqa
+                    dirs.append(entry.path)  # noqa
+                    sub_files, sub_dirs = cls.get_files_and_dirs(entry.path)  # noqa
                     files.extend(sub_files)
                     dirs.extend(sub_dirs)
 
