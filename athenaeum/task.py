@@ -30,6 +30,11 @@ class Task(object):
         pass
 
 
+class BaseTask(Task):
+    def start(self):
+        self.run()
+
+
 class ThreadTask(Task, threading.Thread):
     pass
 
