@@ -39,7 +39,7 @@ class Url(object):
         return params
 
     @classmethod
-    def join_params(cls, params: Optional[Dict[str, str]], url: Optional[str] = None) -> str:
+    def join_params(cls, url: str, params: Optional[Dict[str, str]] = None) -> str:
         if not params:
             return url
         params = cls.encode(params)
@@ -47,7 +47,7 @@ class Url(object):
         return url + separator + params
 
     @classmethod
-    def get_query_param_value(cls, key: str, default: Optional[Any] = None, url: Optional[str] = None) -> str:
+    def get_query_param_value(cls, url: str, key: str, default: Optional[Any] = None) -> str:
         value = furl(url).query.params.get(key, default=default)
         return value
 

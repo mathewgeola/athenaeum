@@ -9,6 +9,7 @@ class Spider(ABC):
     logger = logger
 
     def __init__(self, *args: Any, **kwargs: Any):
+        super().__init__(*args, **kwargs)
         self.init_args = args
         self.init_kwargs = kwargs
 

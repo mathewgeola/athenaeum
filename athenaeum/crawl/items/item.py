@@ -74,4 +74,7 @@ class Item(MutableMapping, metaclass=ItemMeta):
         return dict(self._data)
 
     def copy(self) -> Self:
-        return self.__class__(**self._data)
+        ins = self.__class__(**self._data)
+        ins.is_save = self.is_save
+        ins.Model = self.Model
+        return ins

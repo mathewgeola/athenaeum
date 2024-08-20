@@ -16,9 +16,9 @@ class BaseDataMysqlModel(MysqlModel):
                                 verbose_name='更新时间')
 
     def get_data_id(self) -> str:
-        data_columns = self.data.get('ux_columns')
+        data_columns = self.data.get('data_columns')
         assert (data_columns is not None and isinstance(data_columns, list) and
-                all(map(lambda x: isinstance(x, str), data_columns))), '`ux_columns` 值必须是字符串列表！'
+                all(map(lambda x: isinstance(x, str), data_columns))), '`data_columns` 值必须是字符串列表！'
         for data_column in data_columns:
             if data_column not in self.data:
                 raise ValueError(f'data_columns 中的 `{data_column}` 字段没有赋值，计算得到的 data_id 无效！')

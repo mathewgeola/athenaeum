@@ -5,8 +5,14 @@ import ujson
 import inspect
 import sqlparse
 from htmlmin import minify
-from typing import Dict, Any, List, Protocol
+from typing import Union, Dict, Any, List, Protocol
 from athenaeum.execute.js import execute_js_code_by_py_mini_racer
+
+
+def format_price(price: Union[int, float, str]) -> str:
+    integer, decimal = str(float(price)).split('.')
+    price = f'{integer}.{decimal.zfill(2)}'
+    return price
 
 
 def jsonp_to_json(jsonp: str) -> Dict[str, Any]:

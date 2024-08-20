@@ -69,7 +69,6 @@ class MysqlModel(Model):
 
     @data.setter
     def data(self, data: Dict[str, Any]) -> None:
-        self.__data__ = {}
         for key, value in data.items():
             if key in self.field_column_names:
                 self.__data__[key] = value
