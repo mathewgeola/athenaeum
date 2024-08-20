@@ -30,6 +30,8 @@ drissionpage = "^4.0.5.6"
 pillow = "^10.4.0"
 pandas = "^2.2.2"
 
+[tool.poetry.scripts]
+render_project = "athenaeum.scripts:render_project"
 
 [build-system]
 requires = ["poetry-core"]

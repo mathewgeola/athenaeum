@@ -9,56 +9,63 @@ from athenaeum.logger import logger
 class Render(object):
     logger = logger
 
-    athenaeum_dirpath = os.path.dirname(os.path.abspath(__file__))  # noqa
-    templates_dirpath = os.path.join(athenaeum_dirpath, 'templates')  # noqa
-    project_dirpath = os.path.join(templates_dirpath, 'project')  # noqa
-    cwd_dirpath = os.getcwd()  # noqa
+    athenaeum_dir_path = os.path.dirname(os.path.abspath(__file__))
+    templates_dir_path = os.path.join(athenaeum_dir_path, 'templates')
+    project_dir_path = os.path.join(templates_dir_path, 'project')
+    cwd_dir_path = os.getcwd()
 
     @classmethod
-    def render_template(cls, filepath: Optional[str] = None,
-                        filename: Optional[str] = None, dirpath: Optional[str] = None,
-                        data: Optional[Dict[str, str]] = None,
-                        result_filepath: Optional[str] = None) -> str:
-        if not ((filepath is not None) or (filename is not None and dirpath is not None)):
-            raise ValueError(f'filepath：`{filepath}` 或 filename：`{filename}` 和 dirpath：`{dirpath}` 必须赋值！')
-        if data is None:
-            data = dict()
+    def render_template(cls, *, file_path: Optional[str] = None,
+                        file_name: Optional[str] = None, dir_path: Optional[str] = None,
+                        render_data: Optional[Dict[str, str]] = None,
+                        render_file_path: Optional[str] = None) -> str:
+        if file_path is None and (file_name is None or dir_path is None):
+            raise ValueError(f'file_path：`{file_path}` 或 file_name：`{file_name}` 和 dir_path：`{dir_path}` 必须赋值！')
 
-        if filepath is not None:
-            filename = os.path.basename(filepath)
-            dirpath = os.path.dirname(filepath)
+        if render_data is None:
+            render_data = dict()
 
-        loader = jinja2.FileSystemLoader(searchpath=dirpath)
+        if file_path is not None:
+            file_name = os.path.basename(file_path)
+            dir_path = os.path.dirname(file_path)
+
+        loader = jinja2.FileSystemLoader(searchpath=dir_path)
         env = jinja2.Environment(loader=loader)
-        template = env.get_template(name=filename)
-        result = template.render(**data)
+        template = env.get_template(name=file_name)
+        result = template.render(**render_data)
 
-        if result_filepath is not None:
-            with open(result_filepath, 'w', encoding='utf-8') as f:
+        if render_file_path is not None:
+            with open(render_file_path, 'w', encoding='utf-8') as f:
                 f.write(result)
 
-        cls.logger.success(f'渲染结果：`{result}`')
         return result
 
     @classmethod
-    def render_project(cls, project_name: str = os.path.basename(cwd_dirpath)) -> None:
-        files, dirs = File.get_files_and_dirs(cls.project_dirpath)
-        for src_file in files:
-            target_file = os.path.join(cls.cwd_dirpath, os.path.relpath(src_file, cls.project_dirpath))
+    def render_project(cls, *, project_name: str) -> None:
+        data = {
+            'project_name': project_name
+        }
+        file_paths, dir_paths = File.get_file_paths_and_dir_paths(cls.project_dir_path)
+        for file_path in file_paths:
+            src_file_path = file_path
+            dest_file_path = os.path.join(cls.cwd_dir_path, os.path.relpath(src_file_path, cls.project_dir_path))
             try:
-                target_dir = os.path.dirname(target_file)
-                os.makedirs(target_dir, exist_ok=True)
-                target_name = os.path.basename(target_file)
-                target_prefix, target_suffix = os.path.splitext(target_name)
-                if target_suffix == '.jinja2':
-                    target_file = os.path.join(target_dir, target_prefix)
-                    target_data = {
-                        'project_name': project_name
-                    }
-                    if not os.path.exists(target_file):
-                        cls.render_template(filepath=src_file, data=target_data, result_filepath=target_file)
-                if not os.path.exists(target_file):
-                    shutil.copy(src_file, target_file)
-                    cls.logger.success(f'渲染项目成功，target_file：`{target_file}`')
+                dest_dir_path = os.path.dirname(dest_file_path)
+                os.makedirs(dest_dir_path, exist_ok=True)
+                dest_file_name = os.path.basename(dest_file_path)
+                dest_file_prefix, dest_file_suffix = os.path.splitext(dest_file_name)
+                if dest_file_suffix == '.jinja2':
+                    dest_file_path = os.path.join(dest_dir_path, dest_file_prefix)
+                    if not os.path.exists(dest_file_path):
+                        cls.render_template(file_path=src_file_path, render_data=data, render_file_path=dest_file_path)
+                        cls.logger.success(f'成功渲染：`{src_file_path}` -> `{dest_file_path}`')
+                    else:
+                        cls.logger.warning(f'取消渲染（文件已存在）：`{src_file_path}` -> `{dest_file_path}`')
+                else:
+                    if not os.path.exists(dest_file_path):
+                        shutil.copy(src_file_path, dest_file_path)
+                        cls.logger.success(f'成功拷贝：`{src_file_path}` -> `{dest_file_path}`')
+                    else:
+                        cls.logger.warning(f'取消拷贝（文件已存在）：`{src_file_path}` -> `{dest_file_path}`')
             except Exception as exception:
-                cls.logger.exception(f'渲染项目异常，exception：`{exception}`！')
+                cls.logger.exception(f'执行出错，exception：`{exception}`！')

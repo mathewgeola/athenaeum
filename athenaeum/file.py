@@ -1,22 +1,24 @@
 import os
+from posix import DirEntry
 from typing import List, Tuple
 
 
 class File(object):
 
     @classmethod
-    def get_files_and_dirs(cls, path: str) -> Tuple[List[str], List[str]]:
-        files = []
-        dirs = []
+    def get_file_paths_and_dir_paths(cls, path: str) -> Tuple[List[str], List[str]]:
+        file_paths = []
+        dir_paths = []
 
         with os.scandir(path) as entries:
             for entry in entries:
-                if entry.is_file():  # noqa
-                    files.append(entry.path)  # noqa
-                elif entry.is_dir():  # noqa
-                    dirs.append(entry.path)  # noqa
-                    sub_files, sub_dirs = cls.get_files_and_dirs(entry.path)  # noqa
-                    files.extend(sub_files)
-                    dirs.extend(sub_dirs)
+                entry: DirEntry
+                if entry.is_file():
+                    file_paths.append(entry.path)
+                elif entry.is_dir():
+                    dir_paths.append(entry.path)
+                    sub_file_paths, sub_dir_paths = cls.get_file_paths_and_dir_paths(entry.path)
+                    file_paths.extend(sub_file_paths)
+                    dir_paths.extend(sub_dir_paths)
 
-        return files, dirs
+        return file_paths, dir_paths
