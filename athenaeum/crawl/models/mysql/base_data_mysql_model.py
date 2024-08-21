@@ -1,5 +1,5 @@
-from athenaeum.crawl.models.peewee_data_model import PeeweeDataModel
+from athenaeum.crawl.models.base_data_peewee_model import BaseDataPeeweeModel
 
 
-class BaseDataMysqlModel(PeeweeDataModel):
+class BaseDataMysqlModel(BaseDataPeeweeModel):
     _db_type = 'mysql'

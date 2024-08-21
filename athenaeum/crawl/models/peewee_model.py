@@ -4,6 +4,10 @@ from athenaeum.logger import logger
 
 
 class PeeweeModel(Model):
+    """
+    https://docs.peewee-orm.com/en/3.15.3/peewee/api.html#ColumnBase
+
+    """
     logger = logger
 
     id = PrimaryKeyField(verbose_name='ID')

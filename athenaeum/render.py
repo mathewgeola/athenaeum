@@ -2,7 +2,7 @@ import os
 import jinja2
 import shutil
 from typing import Optional, Dict
-from athenaeum.file import File
+from athenaeum.file import get_file_paths_and_dir_paths
 from athenaeum.logger import logger
 
 
@@ -45,7 +45,7 @@ class Render(object):
         data = {
             'project_name': project_name
         }
-        file_paths, dir_paths = File.get_file_paths_and_dir_paths(cls.project_dir_path)
+        file_paths, dir_paths = get_file_paths_and_dir_paths(cls.project_dir_path)
         for file_path in file_paths:
             src_file_path = file_path
             dest_file_path = os.path.join(cls.cwd_dir_path, os.path.relpath(src_file_path, cls.project_dir_path))

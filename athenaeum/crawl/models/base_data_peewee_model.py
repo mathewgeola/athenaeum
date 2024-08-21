@@ -1,4 +1,4 @@
-from peewee import CharField, SmallIntegerField, DateTimeField, SQL, Model, Field
+from peewee import Model, CharField, SmallIntegerField, DateTimeField, SQL, Field
 from playhouse.mysql_ext import JSONField as mysql_ext_JSONField
 from playhouse.sqlite_ext import JSONField as sqlite_ext_JSONField
 from typing import Optional, Union, Dict, Any, Type
@@ -16,7 +16,7 @@ def get_json_field(db_type: str) -> Union[Type[mysql_ext_JSONField], Type[sqlite
         raise ValueError(f'不支持 db_type：`{db_type}`！')
 
 
-class BasePeeweeDataModelMeta(ModelMeta):
+class BaseDataPeeweeModelMeta(ModelMeta):
     def __new__(cls, name, bases, attrs):
         if attrs.get('data_columns') is None:
             if (db_type := attrs.get('_db_type')) is None:
@@ -26,7 +26,7 @@ class BasePeeweeDataModelMeta(ModelMeta):
         return super().__new__(cls, name, bases, attrs)
 
 
-class BasePeeweeDataModel(PeeweeModel, metaclass=BasePeeweeDataModelMeta):
+class BaseDataPeeweeModel(PeeweeModel, metaclass=BaseDataPeeweeModelMeta):
     _db_type: Optional[str] = None
     data_id = CharField(unique=True, max_length=32, verbose_name='数据ID')
     data_columns: Optional[Field] = None
@@ -34,6 +34,11 @@ class BasePeeweeDataModel(PeeweeModel, metaclass=BasePeeweeDataModelMeta):
     create_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')], verbose_name='创建时间')
     update_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')],
                                 verbose_name='更新时间')
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} id：`{self.id}` data_id：`{self.data_id}`>'
+
+    __str__ = __repr__
 
     def get_data_id(self) -> str:
         data_columns = self.data.get('data_columns')
@@ -54,7 +59,8 @@ class BasePeeweeDataModel(PeeweeModel, metaclass=BasePeeweeDataModelMeta):
         return self.get_or_none(self.__class__.data_id == data_id)
 
     def store(self, data: Optional[Dict[str, Any]] = None) -> bool:
-        self.data = data
+        if data is not None:
+            self.data = data
         data_id = self.get_data_id()
         row = self.get_row_by_data_id(data_id)
         if row is None:
