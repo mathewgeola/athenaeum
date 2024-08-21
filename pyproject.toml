@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "athenaeum"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 authors = ["mathewgeola <mathewgeola@163.com>"]
 readme = "README.md"
