@@ -30,6 +30,7 @@ drissionpage = "^4.0.5.6"
 pillow = "^10.4.0"
 pandas = "^2.2.2"
 requests-toolbelt = "^1.0.0"
+sqlalchemy = "^2.0.32"
 
 [tool.poetry.scripts]
 render_project = "athenaeum.scripts:render_project"

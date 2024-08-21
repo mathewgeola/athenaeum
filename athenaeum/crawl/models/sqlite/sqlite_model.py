@@ -1,14 +1,9 @@
 from athenaeum.crawl.models.peewee_model import PeeweeModel
-from athenaeum.db.orm.mysql_orm import mysql_orm
+from athenaeum.db.orm.sqlite_orm import sqlite_orm
 from athenaeum.project import camel_to_snake
 
 
-class MysqlModel(PeeweeModel):
-    """
-    https://docs.peewee-orm.com/en/3.15.3/peewee/api.html#ColumnBase
-
-    """
-
+class __SqliteModel(PeeweeModel):
     class Meta:
-        database = mysql_orm
+        database = sqlite_orm
         table_function = lambda model_class: camel_to_snake(model_class.__name__)  # noqa
