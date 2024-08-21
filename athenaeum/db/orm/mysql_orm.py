@@ -11,4 +11,4 @@ db_config = {
     'use_unicode': True,
     'init_command': "SET time_zone='+8:00'"
 }
-mysql_db_orm = MySQLDatabase(**db_config)
+mysql_orm = MySQLDatabase(**db_config)

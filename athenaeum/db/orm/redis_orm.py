@@ -7,4 +7,4 @@ db_config = {
     'db': settings.REDIS_DBNAME,
     'password': settings.REDIS_PASSWORD,
 }
-redis_db_orm = Database(**db_config)
+redis_orm = Database(**db_config)
