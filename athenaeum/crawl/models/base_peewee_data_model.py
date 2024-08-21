@@ -1,12 +1,35 @@
-from typing import Optional, Dict, Any
-from peewee import CharField, SmallIntegerField, DateTimeField, SQL, Model
+from peewee import CharField, SmallIntegerField, DateTimeField, SQL, Model, Field
+from playhouse.mysql_ext import JSONField as mysql_ext_JSONField
+from playhouse.sqlite_ext import JSONField as sqlite_ext_JSONField
+from typing import Optional, Union, Dict, Any, Type
+from athenaeum.crawl.models.model import ModelMeta
 from athenaeum.crawl.models.peewee_model import PeeweeModel
 from athenaeum.project import gen_data_id
 
 
-class PeeweeDataModel(PeeweeModel):
+def get_json_field(db_type: str) -> Union[Type[mysql_ext_JSONField], Type[sqlite_ext_JSONField]]:
+    if db_type == 'mysql':
+        return mysql_ext_JSONField
+    elif db_type == 'sqlite':
+        return sqlite_ext_JSONField
+    else:
+        raise ValueError(f'不支持 db_type：`{db_type}`！')
+
+
+class BasePeeweeDataModelMeta(ModelMeta):
+    def __new__(cls, name, bases, attrs):
+        if attrs.get('data_columns') is None:
+            if (db_type := attrs.get('_db_type')) is None:
+                raise ValueError(f'name：`{name}` 类属性 _db_type 值不能为 `{db_type}`!')
+            else:
+                attrs['data_columns'] = get_json_field(db_type)(default=None, verbose_name='数据字段')
+        return super().__new__(cls, name, bases, attrs)
+
+
+class BasePeeweeDataModel(PeeweeModel, metaclass=BasePeeweeDataModelMeta):
+    _db_type: Optional[str] = None
     data_id = CharField(unique=True, max_length=32, verbose_name='数据ID')
-    data_columns = JSONField(default=None, verbose_name='数据字段')
+    data_columns: Optional[Field] = None
     status = SmallIntegerField(index=True, default=1, constraints=[SQL('DEFAULT 1')], verbose_name='状态')
     create_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')], verbose_name='创建时间')
     update_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')],
