@@ -7,3 +7,10 @@ poetry install
 poetry run render_project example
 
 ~~~
+
+
+~~~shell
+python -m unittest
+
+
+~~~
