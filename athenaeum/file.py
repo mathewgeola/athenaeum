@@ -1,5 +1,5 @@
 import os
-from posix import DirEntry
+import platform
 from typing import List, Tuple
 
 
@@ -9,6 +9,15 @@ def get_file_paths_and_dir_paths(path: str) -> Tuple[List[str], List[str]]:
 
     with os.scandir(path) as entries:
         for entry in entries:
+            system = platform.system()
+            if system == 'Windows':
+                from nt import DirEntry
+            elif system == 'Linux':
+                from posix import DirEntry
+            elif system == 'Darwin':
+                from posix import DirEntry
+            else:
+                raise ValueError(f'system：`{system}` 不支持该系统！')
             entry: DirEntry
             if entry.is_file():
                 file_paths.append(entry.path)

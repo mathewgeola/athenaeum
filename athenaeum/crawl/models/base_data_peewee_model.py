@@ -1,39 +1,56 @@
+import datetime
+from abc import ABC
 from peewee import Model, CharField, SmallIntegerField, DateTimeField, SQL, Field
-from playhouse.mysql_ext import JSONField as mysql_ext_JSONField
-from playhouse.sqlite_ext import JSONField as sqlite_ext_JSONField
-from typing import Optional, Union, Dict, Any, Type
-from athenaeum.crawl.models.model import ModelMeta
+from typing import Optional, Dict, Any
 from athenaeum.crawl.models.peewee_model import PeeweeModel
+from athenaeum.metas import gen_base_class_with_metaclass
 from athenaeum.project import gen_data_id
 
 
-def get_json_field(db_type: str) -> Union[Type[mysql_ext_JSONField], Type[sqlite_ext_JSONField]]:
+def set_Fields(cls, db_type):  # noqa
     if db_type == 'mysql':
-        return mysql_ext_JSONField
+        if cls.__dict__['data_columns'] is None:
+            setattr(cls, 'data_id', CharField(unique=True, max_length=32, verbose_name='数据ID'))
+            from playhouse.mysql_ext import JSONField
+            setattr(cls, 'data_columns', JSONField(default=['id'], verbose_name='数据字段'))
+            setattr(cls, 'status', SmallIntegerField(index=True, default=1, constraints=[SQL('DEFAULT 1')],
+                                                     verbose_name='状态'))
+            setattr(cls, 'create_time', DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')],
+                                                      verbose_name='创建时间'))
+            setattr(cls, 'update_time', DateTimeField(index=True,
+                                                      constraints=[
+                                                          SQL('DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')
+                                                      ], verbose_name='更新时间'))
     elif db_type == 'sqlite':
-        return sqlite_ext_JSONField
+        if cls.__dict__['data_columns'] is None:
+            setattr(cls, 'data_id', CharField(unique=True, max_length=32, verbose_name='数据ID'))
+            from playhouse.sqlite_ext import JSONField
+            setattr(cls, 'data_columns', JSONField(default=['id'], verbose_name='数据字段'))
+            setattr(cls, 'status', SmallIntegerField(index=True, default=1, verbose_name='状态'))
+            setattr(cls, 'create_time', DateTimeField(index=True, default=datetime.datetime.now,
+                                                      verbose_name='创建时间'))
+            setattr(cls, 'update_time', DateTimeField(index=True, default=datetime.datetime.now,
+                                                      verbose_name='更新时间'))
     else:
         raise ValueError(f'不支持 db_type：`{db_type}`！')
 
 
-class BaseDataPeeweeModelMeta(ModelMeta):
+class BaseDataPeeweeModelMeta(type):
     def __new__(cls, name, bases, attrs):
-        if attrs.get('data_columns') is None:
-            if (db_type := attrs.get('_db_type')) is None:
-                raise ValueError(f'name：`{name}` 类属性 _db_type 值不能为 `{db_type}`!')
-            else:
-                attrs['data_columns'] = get_json_field(db_type)(default=None, verbose_name='数据字段')
-        return super().__new__(cls, name, bases, attrs)
+        cls = super().__new__(cls, name, bases, attrs)
+        if (_db_type := cls.__dict__['_db_type']) is not None:
+            set_Fields(cls, _db_type)
+        return cls
 
 
-class BaseDataPeeweeModel(PeeweeModel, metaclass=BaseDataPeeweeModelMeta):
-    _db_type: Optional[str] = None
-    data_id = CharField(unique=True, max_length=32, verbose_name='数据ID')
+class BaseDataPeeweeModel(gen_base_class_with_metaclass(PeeweeModel, ABC,
+                                                        extra_base_class_metas=(BaseDataPeeweeModelMeta,))):
+    # todo: 了解下为啥这里直接赋值 Field 会失败？
+    data_id: Optional[Field] = None
     data_columns: Optional[Field] = None
-    status = SmallIntegerField(index=True, default=1, constraints=[SQL('DEFAULT 1')], verbose_name='状态')
-    create_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')], verbose_name='创建时间')
-    update_time = DateTimeField(index=True, constraints=[SQL('DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP')],
-                                verbose_name='更新时间')
+    status: Optional[Field] = None
+    create_time: Optional[Field] = None
+    update_time: Optional[Field] = None
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} id：`{self.id}` data_id：`{self.data_id}`>'
@@ -45,6 +62,9 @@ class BaseDataPeeweeModel(PeeweeModel, metaclass=BaseDataPeeweeModelMeta):
         assert (data_columns is not None and isinstance(data_columns, list) and
                 all(map(lambda x: isinstance(x, str), data_columns))), '`data_columns` 值必须是字符串列表！'
         for data_column in data_columns:
+            if data_column not in self.field_column_names:
+                raise ValueError(f'data_columns 中的 `{data_column}` 没有在 '
+                                 f'`{self.__class__.__name__}` 中定义该类属性字段！')
             if data_column not in self.data:
                 raise ValueError(f'data_columns 中的 `{data_column}` 字段没有赋值，计算得到的 data_id 无效！')
         data_id = self.data.get('data_id')
@@ -69,7 +89,7 @@ class BaseDataPeeweeModel(PeeweeModel, metaclass=BaseDataPeeweeModelMeta):
         else:
             sql = self.update(**self.data).where(self.__class__.data_id == data_id)
             is_insert = False
-        with self.Meta.database.atomic():
+        with self._meta.database.atomic():
             ret = sql.execute()
             if is_insert:
                 self.__data__['id'] = ret

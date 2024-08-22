@@ -1,16 +1,45 @@
+from abc import ABC
 from peewee import Model, PrimaryKeyField, Field
 from typing import Optional, Union, List, Dict, Any
 from athenaeum.logger import logger
+from athenaeum.project import camel_to_snake
+from athenaeum.metas import gen_base_class_with_metaclass, BasesAttrsMergeMeta
 
 
-class PeeweeModel(Model):
+def get_database(db_type):
+    if db_type == 'mysql':
+        from athenaeum.db.orm.mysql_orm import mysql_orm
+        return mysql_orm
+    elif db_type == 'sqlite':
+        from athenaeum.db.orm.sqlite_orm import sqlite_orm
+        return sqlite_orm
+    else:
+        raise ValueError(f'不支持 db_type：`{db_type}`！')
+
+
+class PeeweeModelMeta(type):
+    def __new__(cls, name, bases, attrs):
+        cls = super().__new__(cls, name, bases, attrs)
+        if (_db_type := cls.__dict__['_db_type']) is not None:
+            if cls.__dict__['_meta'].database is None:
+                cls.__dict__['_meta'].database = get_database(_db_type)
+        return cls
+
+
+class PeeweeModel(gen_base_class_with_metaclass(Model, ABC,
+                                                extra_base_class_metas=(BasesAttrsMergeMeta, PeeweeModelMeta))):
     """
     https://docs.peewee-orm.com/en/3.15.3/peewee/api.html#ColumnBase
 
     """
     logger = logger
+    _db_type: Optional[str] = None
 
     id = PrimaryKeyField(verbose_name='ID')
+
+    class Meta:
+        database = None
+        table_function = lambda model_class: camel_to_snake(model_class.__name__)  # noqa
 
     def __init__(self, create_table: bool = True, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -71,7 +100,7 @@ class PeeweeModel(Model):
         id_ = self.data.get('id')
         return id_
 
-    def get_row_by_data_id(self, id_: Union[None, int, str] = None) -> Optional[Model]:
+    def get_row_by_id(self, id_: Union[None, int, str] = None) -> Optional[Model]:
         if id_ is None:
             id_ = self.get_id()
         if id_ is None:
@@ -89,7 +118,7 @@ class PeeweeModel(Model):
         else:
             sql = self.update(**self.data).where(self.__class__.id == id_)
             is_insert = False
-        with self.Meta.database.atomic():
+        with self._meta.database.atomic():
             ret = sql.execute()
             if is_insert:
                 self.__data__['id'] = ret

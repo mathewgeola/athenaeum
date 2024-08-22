@@ -12,11 +12,10 @@ class BaseSpiderMeta(BasesAttrsMergeMeta):
         if attrs.get('name') is None:
             attrs['name'] = camel_to_snake(name)
         cls = super().__new__(mcs, name, bases, attrs)
-        attrs = cls.__dict__
         if not inspect.isabstract(cls):
-            if attrs.get('source') is None:
+            if cls.__dict__.get('source') is None:
                 raise ValueError(f'`{name}.source` 必须提供！')
-            if attrs.get('url') is None:
+            if cls.__dict__.get('url') is None:
                 raise ValueError(f'`{name}.url` 必须提供！')
         return cls
 

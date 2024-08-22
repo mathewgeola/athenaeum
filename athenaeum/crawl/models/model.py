@@ -10,7 +10,7 @@ class ModelMeta(type):
         return False
 
 
-class Model(ABC, metaclass=ModelMeta):
+class Model(ABC, metaclass=ModelMeta):  # model 判断是否合法用，不被继承
 
     @abstractmethod
     def store(self, data: Optional[Dict[str, Any]] = None) -> bool:
