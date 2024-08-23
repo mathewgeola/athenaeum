@@ -5,14 +5,23 @@ import ujson
 import inspect
 import sqlparse
 from htmlmin import minify
-from typing import Union, Dict, Any, List, Protocol
+from typing import Union, Dict, Any, Tuple, Set, List, Protocol
 from athenaeum.execute.js import execute_js_code_by_py_mini_racer
 
 
-def format_price(price: Union[int, float, str]) -> str:
-    integer, decimal = str(float(price)).split('.')
-    price = f'{integer}.{decimal.zfill(2)}'
-    return price
+def format_price(price: Union[int, float, str], places: int = 2) -> str:
+    """
+    >>> format_price(3.1)
+    '3.10'
+
+    :param price:
+    :param places:
+    :return:
+    """
+    integer_str, decimal_str = str(float(price)).split('.')
+    decimal_str = (decimal_str + '0' * (places - len(decimal_str)))[:places]
+    price_str = '.'.join([integer_str, decimal_str])
+    return price_str
 
 
 def jsonp_to_json(jsonp: str) -> Dict[str, Any]:
@@ -74,3 +83,35 @@ def show_progress(container: Container, frequency: float = 1.0) -> None:
 
 def get_routine_name() -> str:
     return inspect.stack()[1][3]
+
+
+class ReMatchError(Exception):
+    pass
+
+
+def re_match(string: str, patterns: Union[str, Tuple[str, ...], Set[str], List[str]], flags: int = 0) -> \
+        Union[None, Dict[str, str], Tuple[str, ...]]:
+    if not patterns:
+        return
+    if isinstance(patterns, str):
+        patterns = [patterns]
+
+    if not ((isinstance(patterns, tuple) or isinstance(patterns, set) or isinstance(patterns, list)) and
+            all(map(lambda x: isinstance(x, str), patterns))):
+        raise ReMatchError(f'patterns：`{patterns}` 赋值错误，其值只能是字符串、字符串元组、字符串集合和'
+                           f'字符串列表其中一个！')
+
+    compilers = [re.compile(pattern, flags) for pattern in patterns]
+    for compiler in compilers:
+        match = compiler.match(string)
+        if match is None:
+            continue
+        groupdict = match.groupdict()  # noqa
+        if groupdict:
+            return groupdict
+        groups = match.groups()
+        if groups:
+            return groups
+        return
+
+    raise ReMatchError(f'string：`{string}` 没有匹配 patterns：`{patterns}`！')

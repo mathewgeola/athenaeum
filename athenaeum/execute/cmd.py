@@ -17,7 +17,7 @@ def execute_cmd(cmd: str, encoding: str = 'utf-8') -> Optional[bool]:
             logger.error(f'cmd：`{cmd}`，运行失败！')
             result = False
     except Exception as exception:
-        logger.exception(f'cmd：`{cmd}` 未知错误，exception：{exception}！')
+        logger.exception(f'cmd：`{cmd}` 未知错误，exception：`{exception}`！')
         result = False
     finally:
         return result

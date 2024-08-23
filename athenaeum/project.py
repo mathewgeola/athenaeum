@@ -1,6 +1,34 @@
 import re
 import hashlib
+from dynaconf.base import LazySettings
 from typing import Optional, Any, List, Dict, Literal
+
+
+def get_settings(settings_keys: List[str],
+                 settings_object: Optional[LazySettings] = None,
+                 settings_dict: Dict[str, Any] = None) -> Optional[Dict[str, Any]]:
+    settings = dict()
+
+    if settings_object is None:
+        try:
+            from config import settings as settings_object  # type: ignore
+        except ModuleNotFoundError:
+            pass
+
+    if settings_object is None and settings_dict is None:
+        return
+
+    if settings_object is not None:
+        for settings_key in settings_keys:
+            if hasattr(settings_object, settings_key):
+                settings[settings_key] = getattr(settings_object, settings_key)
+
+    if settings_dict is not None:
+        for settings_key in settings_keys:
+            if settings_key in settings_dict:
+                settings[settings_key] = settings_dict[settings_key]
+
+    return settings
 
 
 def camel_to_snake(name: str) -> str:
@@ -13,6 +41,24 @@ def camel_to_snake(name: str) -> str:
     """
     name = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).lower()
+
+
+def snake_to_camel(name: str) -> str:
+    """
+    >>> snake_to_camel('snake_case_string')
+    'SnakeCaseString'
+
+    :param name:
+    :return:
+    """
+    parts = name.split('_')
+    result = ''
+    for part in parts:
+        if result == '':
+            result += part.title()
+        else:
+            result += part.capitalize()
+    return result
 
 
 def gen_data_id(

@@ -1,4 +1,5 @@
 import urllib.parse
+import tldextract
 from furl import furl
 from typing import Optional, Dict, List, Any
 
@@ -8,6 +9,8 @@ def get_origin_path(url: str) -> str:
 
 
 def is_valid(url: str) -> bool:
+    if not isinstance(url, str):
+        return False
     try:
         result = urllib.parse.urlparse(url)
         return all([result.scheme, result.netloc])
@@ -51,3 +54,9 @@ def get_query_param_value(url: str, key: str, default: Optional[Any] = None) -> 
 
 def get_path_segments(url: str) -> List[str]:
     return furl(url).path.segments
+
+
+def get_domain(url: str) -> str:
+    er = tldextract.extract(url)
+    domain = er.domain
+    return domain

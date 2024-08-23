@@ -1,9 +1,10 @@
 import os
 import jinja2
 import shutil
-from typing import Optional, Dict
-from athenaeum.file import get_file_paths_and_dir_paths
+from typing import Optional, Dict, Any
 from athenaeum.logger import logger
+from athenaeum.file import get_file_paths_and_dir_paths
+from athenaeum.project import camel_to_snake, snake_to_camel
 
 
 class Render(object):
@@ -11,14 +12,19 @@ class Render(object):
 
     athenaeum_dir_path = os.path.dirname(os.path.abspath(__file__))
     templates_dir_path = os.path.join(athenaeum_dir_path, 'templates')
+
     project_dir_path = os.path.join(templates_dir_path, 'project')
+    items_dir_path = os.path.join(templates_dir_path, 'items')
+    models_dir_path = os.path.join(templates_dir_path, 'models')
+    spiders_dir_path = os.path.join(templates_dir_path, 'spiders')
+
     cwd_dir_path = os.getcwd()
 
     @classmethod
-    def render_template(cls, *, file_path: Optional[str] = None,
-                        file_name: Optional[str] = None, dir_path: Optional[str] = None,
-                        render_data: Optional[Dict[str, str]] = None,
-                        render_file_path: Optional[str] = None) -> str:
+    def render(cls, file_path: Optional[str] = None,
+               dir_path: Optional[str] = None, file_name: Optional[str] = None,
+               render_data: Optional[Dict[str, Any]] = None,
+               render_file_path: Optional[str] = None) -> str:
         if file_path is None and (file_name is None or dir_path is None):
             raise ValueError(f'file_path：`{file_path}` 或 file_name：`{file_name}` 和 dir_path：`{dir_path}` 必须赋值！')
 
@@ -26,11 +32,13 @@ class Render(object):
             render_data = dict()
 
         if file_path is not None:
-            file_name = os.path.basename(file_path)
             dir_path = os.path.dirname(file_path)
+            file_name = os.path.basename(file_path)
 
         loader = jinja2.FileSystemLoader(searchpath=dir_path)
         env = jinja2.Environment(loader=loader)
+        env.filters['camel_to_snake'] = camel_to_snake
+        env.filters['snake_to_camel'] = snake_to_camel
         template = env.get_template(name=file_name)
         result = template.render(**render_data)
 
@@ -41,7 +49,7 @@ class Render(object):
         return result
 
     @classmethod
-    def render_project(cls, *, project_name: str) -> None:
+    def render_project(cls, project_name: str) -> None:
         data = {
             'project_name': project_name
         }
@@ -57,7 +65,7 @@ class Render(object):
                 if dest_file_suffix == '.jinja2':
                     dest_file_path = os.path.join(dest_dir_path, dest_file_prefix)
                     if not os.path.exists(dest_file_path):
-                        cls.render_template(file_path=src_file_path, render_data=data, render_file_path=dest_file_path)
+                        cls.render(file_path=src_file_path, render_data=data, render_file_path=dest_file_path)
                         cls.logger.success(f'成功渲染：`{src_file_path}` -> `{dest_file_path}`')
                     else:
                         cls.logger.warning(f'取消渲染（文件已存在）：`{src_file_path}` -> `{dest_file_path}`')

@@ -19,8 +19,10 @@ logging.setLoggerClass(Logger)
 LoggerType = TypeVar('LoggerType', bound=Logger)
 
 
-def _set_console_handler(_logger: Logger, console_fmt: str) -> Logger:
+def _set_console_handler(_logger: Logger, console_level: str,
+                         console_fmt: str) -> Logger:
     console_handler = logging.StreamHandler()
+    console_handler.setLevel(console_level)
     green = {
         'DEBUG': 'green',
         'INFO': 'green',
@@ -67,13 +69,14 @@ def _set_console_handler(_logger: Logger, console_fmt: str) -> Logger:
     return _logger
 
 
-def _set_file_handler(_logger: Logger,
+def _set_file_handler(_logger: Logger, file_level: str,
                       file_path: str, file_mode: str, file_max_bytes: int, file_backup_count: int, file_encoding: str,
                       file_fmt: str) -> Logger:
     file_handler = logging.handlers.RotatingFileHandler(
         file_path,
         mode=file_mode, maxBytes=file_max_bytes, backupCount=file_backup_count, encoding=file_encoding
     )
+    file_handler.setLevel(file_level)
     file_formatter = logging.Formatter(file_fmt)
     file_handler.setFormatter(file_formatter)
     _logger.addHandler(file_handler)
@@ -84,6 +87,7 @@ def get_logger(
         name: Optional[str] = None,
         level: str = 'DEBUG',
         to_console: bool = True,
+        console_level: str = 'DEBUG',
         console_fmt: str = (
                 '%(asctime_log_color)s%(asctime)s %(reset)s| '
                 '%(name_log_color)s%(name)s %(reset)s| '
@@ -95,6 +99,7 @@ def get_logger(
                 '%(message_log_color)s%(message)s'
         ),
         to_file: bool = False,
+        file_level: str = 'DEBUG',
         file_path: Optional[str] = None,
         file_mode: str = 'a',
         file_max_bytes: int = 10 * 1024 * 1024,
@@ -126,6 +131,7 @@ def get_logger(
         console_handler_exists = any(isinstance(handler, logging.StreamHandler) for handler in _logger.handlers)
         if not console_handler_exists:
             _set_console_handler(_logger,
+                                 console_level=console_level,
                                  console_fmt=console_fmt)
 
     if to_file:
@@ -135,6 +141,7 @@ def get_logger(
             if file_path is None:
                 file_path = _file_path
             _set_file_handler(_logger,
+                              file_level=file_level,
                               file_path=file_path, file_mode=file_mode, file_max_bytes=file_max_bytes,
                               file_backup_count=file_backup_count, file_encoding=file_encoding,
                               file_fmt=file_fmt)
